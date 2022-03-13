@@ -1,0 +1,10 @@
+region,district,idp,hc,target
+region_1,district_1,187,61,248
+region_1,district_2,164,128,292
+region_1,district_3,167,202,369
+region_2,district_1,176,205,381
+region_2,district_2,116,112,228
+region_2,district_3,187,195,382
+region_3,district_1,131,296,427
+region_3,district_2,198,126,324
+region_3,district_3,175,98,273
