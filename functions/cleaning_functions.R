@@ -164,89 +164,57 @@ get_na_response_rates<-function(data){
     arrange(num_non_response, question)
 }
 
-# Function 11 - 
-write_excel_as_reach_format <- function(write_list,output_path,cols_for_color = NULL){
+# Function 11 - Check survey against sample frame
+
+
+
+# Function 12 - Check Tool Constraints
+
+check_answer_in_list <- function(constraint) {
   
-  
-  headerStyle <- createStyle(fontSize = 12,
-                             fontColour = "#FFFFFF",
-                             halign = "center",
-                             valign = "center",
-                             fontName = "Arial Narrow",
-                             textDecoration = "bold",
-                             fgFill = "#ee5859",
-                             border = "TopBottomLeftRight ",
-                             borderColour = "#fafafa",
-                             wrapText = T)
-  
-  bodyStyle <- createStyle(fontSize = 11,
-                           fontName = "Arial Narrow",
-                           border = "TopBottomLeftRight ",
-                           borderColour = "#4F81BD",
-                           valign = "center",
-                           halign = "left")
-  
-  
-  
-  
-  wb <- createWorkbook()
-  
-  
-  number_of_sheet <- length(write_list)
-  
-  for(i in 1:number_of_sheet ){
-    
-    dataset_name <- names(write_list[i])
-    dataset <-  get(dataset_name)
-    
-    
-    addWorksheet(wb,dataset_name)
-    writeData(wb, sheet = i,dataset, rowNames = F)
-    addFilter(wb,sheet =  i, row = 1, cols = 1:ncol(dataset))
-    #freezePane(wb, sheet = i, firstCol = TRUE, firstRow = T)
-    addStyle(wb, sheet = i, headerStyle, rows = 1, cols = 1:ncol(dataset), gridExpand = TRUE)
-    addStyle(wb, sheet = i, bodyStyle, rows = 1:nrow(dataset)+1, cols = 1:ncol(dataset), gridExpand = TRUE)
-    setColWidths(wb, i, cols = 1:ncol(dataset), widths = 25)
-    setRowHeights(wb, i, 1, 20)
-    
-    if(!is.null(cols_for_color)){
-      u = unique(dataset[[cols_for_color]])
-      
-      for(x in u){
-        y = which(dataset[[cols_for_color]] == x)
-        
-        random.color <- randomColor(1, luminosity = "light")
-        
-        style <- createStyle(fgFill=random.color,
-                             fontSize = 11,
-                             fontName = "Arial Narrow",
-                             border = "TopBottomLeftRight ",
-                             borderColour = "#4F81BD",
-                             valign = "center",
-                             halign = "left")
-        
-        
-        addStyle(wb, sheet = i, style, rows = y+1, cols = 1:ncol(dataset), gridExpand = TRUE)
-        
-        
-        
-      }
-      
-      
-    }
-    
+  if(!str_detect(constraint,",")){
+    return(TRUE)
   }
   
+  question_regex <- "\\{([^()]+)\\}"
+  answer_regex <- "\\'([^()]+)\\'"
   
-  saveWorkbook(wb, file = output_path, overwrite = TRUE)
+  question <- gsub(question_regex, "\\1", str_extract_all(constraint, question_regex)[[1]])
+  answer <- gsub(answer_regex, "\\1", str_extract_all(constraint, answer_regex)[[1]])
+  
+  question_type <- questions %>% 
+    filter(name==question) %>% 
+    filter(!grepl("^(begin|end)\\s+group$",type)) %>% 
+    pull(type)
+  
+  listname <- gsub("^.*\\s","",question_type)
+  
+  choices_list <- choices %>% filter(list_name==listname) %>% pull(name)
+  
+  return(answer %in% choices_list)
+  
+}
+
+check_constraints <- function(questions,choices) {
+  
+  questions <- mutate_at(questions, c("name", "type"), ~str_trim(.))
+  choices <- mutate_at(choices, c("list_name", "name"), ~str_trim(.))
+  
+  all_contraints <- questions %>% filter(grepl("selected",relevant)) %>% pull(relevant)
+  all_contraints <- gsub('"',"'",all_contraints)
+  
+  rs_list <- map(all_contraints,~map_lgl(unlist(ex_default(.x, pattern = "selected\\s*\\([^\\)]*\\)")),check_answer_in_list))
+  
+  map2(rs_list,seq_along(rs_list), ~ if(length(which(!.x))!=0) {
+    return(unlist(ex_default(all_contraints[.y], pattern = "selected\\s*\\([^\\)]*\\)"))[which(!.x)])
+  } ) %>% unlist() %>% unique()
   
 }
 
 
-
-
-
-
+#### Other useful functions
+# clog summary function - that can show where the problems are relay coming!!
+# 
 
 
 
