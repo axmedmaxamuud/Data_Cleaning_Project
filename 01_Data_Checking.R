@@ -9,19 +9,34 @@ library(tidyr)
 library(readxl)
 library(openxlsx)
 library(digest)
+library(stringr)
+library(magrittr)
+library(sf)
+library(qdapRegex)
+library(purrr)
 source("functions/cleaning_functions.R")
 
 # initalize common variables
 survey_start_date <- "1/1/2022"
 survey_end_date <- "5/1/2022"
 
-# load raw data
-data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE)
-checklist <- readxl::read_excel("input/check_list.xlsx")
-ki_info <- read.csv("input/hash_itemset.csv", stringsAsFactors = FALSE)
-logbook <- as.data.frame(logbook())
+# load data
+data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE) # data downloaded from kobo
+# data <- read_excel("input/data_2022-05-16.xlsx")
+checklist <- readxl::read_excel("input/check_list.xlsx") # list of checks that can be used to inspect the data
+ki_info <- read.csv("input/hash_itemset.csv", stringsAsFactors = FALSE) # any ki info that needs to be incremented
+logbook <- as.data.frame(logbook()) # blank logbook that can store all identifed issues from the data
 
-## Standard Checks
+## Coverage Check --------------------------------------------------------------------
+
+# check survey progress
+check_survey_progress <- survey_tracker(data, region = "region", district = "district")
+# check enumerator productivity
+check_enum_performance <- enum_productivity(data, enum_name = "enum_name")
+# check assessment producity
+check_survey_productivity <- assessment_productivity(data)
+
+## Standard Checks -------------------------------------------------------------------
 # Check 1 - survey time taken
 check_survey_time <- time_check(data, time_min = 15, time_max = 40) %>% 
   filter(CHECK_interview_duration != "Okay") %>% 
@@ -32,11 +47,11 @@ logbook <- rbind(logbook, check_survey_time)
 check_others <- check_other_responses(data)
 logbook <- rbind(logbook, check_others)
 
-# Check 3 - outlier checks
+# Check 3 - Outlier checks
 
 
 
-## Specific checks
+## Specific checks ------------------------------------------------------------------
 # check 4 - ki age
 check_age <- data %>% 
   filter(ki_age > 110) %>% log_sheet(question.name = "ki_age", issue = "please confirm the reported ki age", action = "flag")
@@ -49,12 +64,7 @@ run_all_checks <- run_checks_from_dataframe(df = data,
                                             test.name.column = "name",
                                             meta_to_keep = c("uuid", "region"))
 
-# check survey tracker
-tracker <- survey_tracker(data, region = "region", district = "district")
-
-# check enumerator productivity
-enumerator_productivity <- enum_productivity(data, enum_name = "enum_name")
-
 ## Export log_bood
 write.xlsx(logbook, paste0("output/logbook_", today,".xlsx"))
+
 
