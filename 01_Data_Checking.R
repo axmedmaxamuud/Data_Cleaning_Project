@@ -19,10 +19,13 @@ source("functions/cleaning_functions.R")
 # initalize common variables
 survey_start_date <- "1/1/2022"
 survey_end_date <- "5/1/2022"
+min_time <- 35
+max_time <- 90
 
 # load data
-data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE) # data downloaded from kobo
-# data <- read_excel("input/data_2022-05-16.xlsx")
+#data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE) # data downloaded from kobo
+data <- read_excel("input/data_2022-06-23.xlsx")
+names(data)[names(data) == "_uuid"] <- "uuid"
 checklist <- readxl::read_excel("input/check_list.xlsx") # list of checks that can be used to inspect the data
 ki_info <- read.csv("input/hash_itemset.csv", stringsAsFactors = FALSE) # any ki info that needs to be incremented
 logbook <- as.data.frame(logbook()) # blank logbook that can store all identifed issues from the data
@@ -66,5 +69,19 @@ run_all_checks <- run_checks_from_dataframe(df = data,
 
 ## Export log_bood
 write.xlsx(logbook, paste0("output/logbook_", today,".xlsx"))
+
+
+
+
+
+## --------------
+
+
+
+
+
+
+
+
 
 
