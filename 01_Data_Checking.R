@@ -23,11 +23,9 @@ min_time <- 35
 max_time <- 90
 
 # load data
-#data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE) # data downloaded from kobo
-data <- read_excel("input/data_2022-06-23.xlsx")
+data <- read.csv("input/testdf.csv", stringsAsFactors = FALSE) # data downloaded from kobo
 names(data)[names(data) == "_uuid"] <- "uuid"
 checklist <- readxl::read_excel("input/check_list.xlsx") # list of checks that can be used to inspect the data
-ki_info <- read.csv("input/hash_itemset.csv", stringsAsFactors = FALSE) # any ki info that needs to be incremented
 logbook <- as.data.frame(logbook()) # blank logbook that can store all identifed issues from the data
 
 ## Coverage Check --------------------------------------------------------------------
@@ -76,8 +74,17 @@ write.xlsx(logbook, paste0("output/logbook_", today,".xlsx"))
 
 ## --------------
 
+data[data$region == "region_1", ]
+nrow(data)
+nrow(data[data$region == "region_1", ])
+
+data <- data %>%  mutate(check_column = "")
+data[data$region == "region_1" & data$district == "district_1", "check_column"] <- "realy"
 
 
+if(data[24, "average_monthly_income"] > 1000){
+  print("that is goodman rich family")
+}
 
 
 
