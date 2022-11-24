@@ -1,4 +1,4 @@
-### Standardization of Data Cleaning with R
+### Data Cleaning Script -Template
 rm(list = ls())
 today <- Sys.Date()
 
