@@ -55,7 +55,7 @@ logbook <- rbind(logbook, check_others)
 ## Specific checks ------------------------------------------------------------------
 # check 4 - ki age
 check_age <- data %>% 
-  filter(ki_age > 110) %>% log_sheet(question.name = "ki_age", issue = "please confirm the reported ki age", action = "flag")
+  filter(ki_age > 110) %>% log_sheet(question.name = "ki_age", issue = "please confirm the reported ki age", action = "change")
 logbook <- rbind(logbook, check_age)
 
 # check 5 - check isuses from the checklist
