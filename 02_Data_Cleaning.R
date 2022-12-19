@@ -6,7 +6,7 @@ today <- Sys.Date()
 library(tidyverse)
 library(readxl)
 library(openxlsx)
-library(clog)
+#library(clog)
 
 # load raw data and updated cleaning log files
 data <- read.csv("input/testdf.csv")
@@ -28,4 +28,14 @@ change_log <- clog_get_cleaninglog(clean_data)
 
 
 
+clog$action <- "yes"
+names(clog)[names(clog) == "action"] <- "changed"
+incorprated_logs <- incorporate_logs(data, clog, uuid_col = "uuid")
+
+
+cleaned_data <- incorprated_logs$cleaned_df
+master_cleaning_log <- incorprated_logs$master_cleaning_log
+logs_not_in_rawDf <- incorprated_logs$logs_not_in_rawDF
+cleaning_log.applied <- incorprated_logs$cleaning_log.applied
+duplicate_log <- incorprated_logs$duplicate_logs
 
