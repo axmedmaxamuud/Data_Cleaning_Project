@@ -7,6 +7,7 @@ library(tidyverse)
 library(readxl)
 library(openxlsx)
 #library(clog)
+source("functions/cleaning_functions.R")
 
 # load raw data and updated cleaning log files
 data <- read.csv("input/testdf.csv")
